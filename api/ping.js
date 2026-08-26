@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: "Missing caller_number parameter" });
     }
 
-    // Ensure proper E.164 format (+1XXXXXXXXXX) to prevent malformed errors
+    // Ensure proper E.164 format (+1XXXXXXXXXX)
     let cleaned = callerNumber.replace(/[^0-9]/g, '');
     if (cleaned.length === 10) {
         callerNumber = '+1' + cleaned;
@@ -28,11 +28,11 @@ module.exports = async (req, res) => {
     const apiKey = "890cbeae-d1df-4a85-bd34-e01151abb477";
     const publisherId = "288bd423";
 
+    // Only the 3 required parameters
     const params = new URLSearchParams({
         key: apiKey,
         publisher_id: publisherId,
-        caller_number: callerNumber,
-        ad_id: ""
+        caller_number: callerNumber
     });
 
     const targetUrl = `${baseUrl}?${params.toString()}`;
