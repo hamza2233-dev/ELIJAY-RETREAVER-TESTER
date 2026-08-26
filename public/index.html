@@ -1,1 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYED MED 120 PING</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 25px;
+        }
+        h2 {
+            font-size: 18px;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccd0d5;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+        input[type="text"]:focus {
+            border-color: #28a745;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
+        }
+        .ping-options {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .radio-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .radio-container:last-child {
+            margin-bottom: 0;
+        }
+        .radio-container input {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .radio-container label {
+            margin-bottom: 0;
+            font-weight: normal;
+            color: #444;
+            cursor: pointer;
+        }
+        .btn-green {
+            width: 100%;
+            padding: 14px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-green:hover {
+            background-color: #218838;
+        }
+        .btn-green:disabled {
+            background-color: #94d3a2;
+            cursor: not-allowed;
+        }
+        .btn-red {
+            background-color: #dc3545;
+            margin-top: 10px;
+            display: none;
+        }
+        .btn-red:hover {
+            background-color: #c82333;
+        }
+        .alert-box {
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .copy-btn {
+            background-color: #155724;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .copy-btn:hover {
+            background-color: #0b2e13;
+        }
+        .json-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .json-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 13px;
+            max-height: 250px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
 
+<div class="card">
+    <h2>SYED MED 120 PING</h2>
+    
+    <div class="form-group">
+        <label for="callerNumber">Client Phone (CID - Required)</label>
+        <input type="text" id="callerNumber" placeholder="+12294378719" oninput="checkNewNumber()">
+    </div>
+
+    <label>Ping Mode Options</label>
+    <div class="ping-options">
+        <div class="radio-container">
+            <input type="radio" id="pingManual" name="pingMode" checked>
+            <label for="pingManual">Manual Single Ping</label>
+        </div>
+        <div class="radio-container">
+            <input type="radio" id="pingAuto10" name="pingMode">
+            <label for="pingAuto10">Auto Ping every 10 seconds</label>
+        </div>
+        <div class="radio-container">
+            <input type="radio" id="pingAuto5" name="pingMode">
+            <label for="pingAuto5">Auto Ping every 5 seconds</label>
+        </div>
+    </div>
+    
+    <button id="pingBtn" class="btn-green" onclick="startPing()">Run Live Ping</button>
+    <button id="stopBtn" class="btn-green btn-red" onclick="stopAutoPing()">Stop Auto Ping</button>
+</div>
+
+<div class="card">
+    <h2>Bid Response</h2>
+    <div id="statusAlert" class="alert-box"></div>
+    
+    <div class="json-header-row">
+        <label style="margin-bottom:0;">Full JSON Response</label>
+        <button class="copy-btn" onclick="copyJsonText()" style="background-color: #6c757d;">Copy JSON</button>
+    </div>
+    <div id="jsonResponse" class="json-box">Waiting for ping request...</div>
+</div>
+
+<script src="ping.js"></script>
+
+</body>
+</html>
