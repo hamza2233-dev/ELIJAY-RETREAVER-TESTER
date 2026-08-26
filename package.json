@@ -1,1 +1,9 @@
-
+{
+  "name": "elija-retreaver-tester",
+  "version": "1.0.0",
+  "description": "Retreaver RTB Live Ping Utility",
+  "main": "api/ping.js",
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
+}
