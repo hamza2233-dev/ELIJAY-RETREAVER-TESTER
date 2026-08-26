@@ -33,12 +33,21 @@ module.exports = async (req, res) => {
         const response = await fetch(targetUrl, {
             method: 'GET',
             headers: {
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+                'X-Api-Key': apiKey
             }
         });
 
         const textData = await response.text();
         
+        // Check if Retreaver returned a login HTML page instead of JSON
+        if (textData.includes("sign in") || textData.includes("sign up") || textData.includes("<!DOCTYPE html>")) {
+            return res.status(401).json({ 
+                error: "Authentication Error: Retreaver is redirecting to a login page. Please verify if your RTB API key or publisher ID is active and correct." 
+            });
+        }
+
         try {
             const jsonData = JSON.parse(textData);
             return res.status(200).json(jsonData);
