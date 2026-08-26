@@ -8,17 +8,26 @@ module.exports = async (req, res) => {
         return res.status(200).end();
     }
 
-    const callerNumber = req.query.caller_number;
+    let callerNumber = req.query.caller_number;
 
     if (!callerNumber) {
         return res.status(400).json({ error: "Missing caller_number parameter" });
+    }
+
+    // Ensure proper E.164 format (+1XXXXXXXXXX) to prevent malformed errors
+    let cleaned = callerNumber.replace(/[^0-9]/g, '');
+    if (cleaned.length === 10) {
+        callerNumber = '+1' + cleaned;
+    } else if (cleaned.length === 11 && cleaned.startsWith('1')) {
+        callerNumber = '+' + cleaned;
+    } else if (!callerNumber.startsWith('+')) {
+        callerNumber = '+' + cleaned;
     }
 
     const baseUrl = "https://rtb.retreaver.com/rtbs.json";
     const apiKey = "890cbeae-d1df-4a85-bd34-e01151abb477";
     const publisherId = "288bd423";
 
-    // Build query parameters (omitting inbound_number)
     const params = new URLSearchParams({
         key: apiKey,
         publisher_id: publisherId,
@@ -29,7 +38,6 @@ module.exports = async (req, res) => {
     const targetUrl = `${baseUrl}?${params.toString()}`;
 
     try {
-        // Retreaver RTB expects a POST request
         const response = await fetch(targetUrl, {
             method: 'POST',
             headers: {
@@ -40,12 +48,6 @@ module.exports = async (req, res) => {
 
         const textData = await response.text();
         
-        if (textData.includes("sign in") || textData.includes("sign up") || textData.includes("<!DOCTYPE html>")) {
-            return res.status(401).json({ 
-                error: "Authentication Error: Retreaver rejected the Postback Key or required a POST method. Please verify your RTB Postback Key permissions." 
-            });
-        }
-
         try {
             const jsonData = JSON.parse(textData);
             return res.status(200).json(jsonData);
