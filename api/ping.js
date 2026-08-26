@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 
 module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
@@ -17,12 +17,11 @@ module.exports = async (req, res) => {
     const baseUrl = "https://rtb.retreaver.com/rtbs.json";
     const apiKey = "890cbeae-d1df-4a85-bd34-e01151abb477";
     const publisherId = "288bd423";
-    const inboundNumber = "18883259916";
 
+    // Build query parameters (omitting inbound_number)
     const params = new URLSearchParams({
         key: apiKey,
         publisher_id: publisherId,
-        inbound_number: inboundNumber,
         caller_number: callerNumber,
         ad_id: ""
     });
@@ -30,21 +29,20 @@ module.exports = async (req, res) => {
     const targetUrl = `${baseUrl}?${params.toString()}`;
 
     try {
+        // Retreaver RTB expects a POST request
         const response = await fetch(targetUrl, {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${apiKey}`,
-                'X-Api-Key': apiKey
+                'Content-Type': 'application/json'
             }
         });
 
         const textData = await response.text();
         
-        // Check if Retreaver returned a login HTML page instead of JSON
         if (textData.includes("sign in") || textData.includes("sign up") || textData.includes("<!DOCTYPE html>")) {
             return res.status(401).json({ 
-                error: "Authentication Error: Retreaver is redirecting to a login page. Please verify if your RTB API key or publisher ID is active and correct." 
+                error: "Authentication Error: Retreaver rejected the Postback Key or required a POST method. Please verify your RTB Postback Key permissions." 
             });
         }
 
